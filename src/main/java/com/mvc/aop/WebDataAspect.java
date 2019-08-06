@@ -1,9 +1,12 @@
 package com.mvc.aop;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mvc.annotation.NotNull;
+import com.mvc.annotation.ResultFilt;
 import com.mvc.annotation.RqStr;
 import com.mvc.error.ParamException;
+import com.mvc.utils.EntityUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
@@ -173,6 +176,27 @@ public class WebDataAspect {
     @After("pointcutAfter()")
     public void doAfter(){
         response.addHeader(WebResponseBodyAdvice.ignore, "true");
+    }
+
+    @Pointcut("@annotation(com.mvc.annotation.ResultFilt)")
+    private void filtPointcut(){
+
+    }
+
+    @AfterReturning(value = "filtPointcut()", returning = "returnValue")
+    public void doFilt(JoinPoint joinPoint, Object returnValue){
+        MethodSignature signature = (MethodSignature)joinPoint.getSignature();
+        // 得到拦截的方法
+        Method method = signature.getMethod();
+
+        ResultFilt annotation = method.getAnnotation(ResultFilt.class);
+        String value = annotation.value();
+        System.out.println(value);
+        if(annotation.isFilt()){
+            EntityUtils.setNull(returnValue, value.split(","));
+        }else {
+            EntityUtils.setOtherNull(returnValue, value.split(","));
+        }
     }
 
 
