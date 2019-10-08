@@ -7,6 +7,7 @@ import com.mvc.annotation.ResultFilt;
 import com.mvc.annotation.RqStr;
 import com.mvc.error.ParamException;
 import com.mvc.utils.EntityUtils;
+import com.mvc.vo.ResultData;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
@@ -191,11 +192,20 @@ public class WebDataAspect {
 
         ResultFilt annotation = method.getAnnotation(ResultFilt.class);
         String value = annotation.value();
-        System.out.println(value);
-        if(annotation.isFilt()){
-            EntityUtils.setNull(returnValue, value.split(","));
+
+        if(returnValue instanceof ResultData){
+            Collection list = ((ResultData) returnValue).getList();
+            if(annotation.isFilt()){
+                list.forEach(e -> EntityUtils.setNull(e, value.split(",")));
+            }else {
+                list.forEach(e -> EntityUtils.setOtherNull(e, value.split(",")));
+            }
         }else {
-            EntityUtils.setOtherNull(returnValue, value.split(","));
+            if(annotation.isFilt()){
+                EntityUtils.setNull(returnValue, value.split(","));
+            }else {
+                EntityUtils.setOtherNull(returnValue, value.split(","));
+            }
         }
     }
 
