@@ -47,14 +47,16 @@ public class WebResponseBodyAdvice implements ResponseBodyAdvice {
             this.errorHandle.handler(new ErrorLog(e, request));
         }
 
-        if(response.getHeader(ignore) != null){
-            throw e;
-        }else if(e instanceof WebException){
-            return new Result(((WebException) e).getCode(), e.getMessage(), null);
-        }else {
-            e.printStackTrace();
-            return new Result(10001, e.getMessage(), null);
-        }
+        return new Result(10001, e.getMessage(), null);
+
+//        if(response.getHeader(ignore) != null){
+//            throw e;
+//        }else if(e instanceof WebException){
+//            return new Result(((WebException) e).getCode(), e.getMessage(), null);
+//        }else {
+//            e.printStackTrace();
+//            return new Result(10001, e.getMessage(), null);
+//        }
     }
 
 

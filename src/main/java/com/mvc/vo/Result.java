@@ -1,6 +1,7 @@
 package com.mvc.vo;
 
 import lombok.Data;
+import lombok.Getter;
 
 import java.io.Serializable;
 
@@ -30,5 +31,17 @@ public class Result implements Serializable {
      * 数据内容
      */
     private Object data;
+
+    @Getter
+    public enum ResultCode {
+        SUCCEED("succeed"),
+        FAILURE("failure");
+
+        private String code;
+
+        ResultCode(String code) {
+            this.code = code;
+        }
+    }
 
 }

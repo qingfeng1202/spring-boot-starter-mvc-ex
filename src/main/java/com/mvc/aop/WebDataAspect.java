@@ -1,5 +1,6 @@
 package com.mvc.aop;
 
+import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mvc.annotation.NotNull;
@@ -22,9 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -134,7 +133,12 @@ public class WebDataAspect {
             if(list.size() == 0){
                 return null;
             }else {
-                return list.toArray(new Object[list.size()]);
+                int i = 0;
+                for (Object o : list){
+                    os[i] = o;
+                    i ++;
+                }
+                return Arrays.copyOf(os, i);
             }
         }else if(arg instanceof Collection){
             Collection<Object> co = (Collection) arg;
@@ -193,6 +197,13 @@ public class WebDataAspect {
         ResultFilt annotation = method.getAnnotation(ResultFilt.class);
         String value = annotation.value();
 
+       /* String json = JSONObject.toJSONString(returnValue);
+        JSONObject jsonObject = JSONObject.parseObject(json);
+        Set<Map.Entry<String, Object>> entries = jsonObject.entrySet();
+        for(Map.Entry<String, Object> entry : entries){
+            entry.getKey()
+        }*/
+
         if(returnValue instanceof ResultData){
             Collection list = ((ResultData) returnValue).getList();
             if(annotation.isFilt()){
@@ -200,7 +211,15 @@ public class WebDataAspect {
             }else {
                 list.forEach(e -> EntityUtils.setOtherNull(e, value.split(",")));
             }
-        }else {
+        }else if(returnValue instanceof Collection){
+            Collection<Object> co = (Collection) returnValue;
+            if(annotation.isFilt()){
+                co.forEach(e -> EntityUtils.setNull(e, value.split(",")));
+            }else {
+                co.forEach(e -> EntityUtils.setOtherNull(e, value.split(",")));
+            }
+        }
+        else {
             if(annotation.isFilt()){
                 EntityUtils.setNull(returnValue, value.split(","));
             }else {
